@@ -1,0 +1,6 @@
+{
+  "appId": "com.worldfg.app",
+  "appName": "WorldFG",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

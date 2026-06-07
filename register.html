@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorldFG Auth</title>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
+    .box {
+      width: 90%;
+      max-width: 340px;
+      background: #111;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #3897f0;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    
+    .switch {
+      text-align: center;
+      margin-top: 10px;
+      color: #aaa;
+      cursor: pointer;
+    }
+    
+    #msg {
+      text-align: center;
+      margin-top: 10px;
+      color: #ff4d4d;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="box">
+    
+    <h2 style="text-align:center;">WorldFG</h2>
+    
+    <!-- LOGIN SECTION -->
+    <div id="loginBox">
+      
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      
+      <button onclick="login()">Login</button>
+      
+      <div class="switch" onclick="showRegister()">
+        Create new account
+      </div>
+      
+    </div>
+    
+    <!-- REGISTER SECTION -->
+    <div id="registerBox" style="display:none;">
+      
+      <input id="first" placeholder="First Name">
+      <input id="last" placeholder="Last Name">
+      <input id="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Password">
+      
+      <button onclick="register()">Create Account</button>
+      
+      <div class="switch" onclick="showLogin()">
+        Already have account? Login
+      </div>
+      
+    </div>
+    
+    <div id="msg"></div>
+    
+  </div>
+  
+  <script>
+    /* FIREBASE */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzByMgtpyY_l2hJc7IQQAT61Dou3u7KOE",
+      authDomain: "worldfg-13c58.firebaseapp.com",
+      projectId: "worldfg-13c58",
+      storageBucket: "worldfg-13c58.appspot.com",
+      messagingSenderId: "766593298296",
+      appId: "1:766593298296:web:8e6d15700c32fe390d628d"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    
+    const auth = firebase.auth();
+    
+    /* UI SWITCH */
+    function showRegister() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("registerBox").style.display = "block";
+      document.getElementById("msg").innerText = "";
+    }
+    
+    function showLogin() {
+      document.getElementById("loginBox").style.display = "block";
+      document.getElementById("registerBox").style.display = "none";
+      document.getElementById("msg").innerText = "";
+    }
+    
+    /* MESSAGE */
+    function msg(text) {
+      document.getElementById("msg").innerText = text;
+    }
+    
+    /* LOGIN */
+    function login() {
+      
+      let email = document.getElementById("loginEmail").value;
+      let password = document.getElementById("loginPassword").value;
+      
+      if (!email || !password) {
+        msg("Fill all fields");
+        return;
+      }
+      
+      auth.signInWithEmailAndPassword(email, password)
+        .then(user => {
+          
+          if (!user.user.emailVerified) {
+            auth.signOut();
+            msg("Please verify your email first");
+            return;
+          }
+          
+          window.location.href = "index.html";
+          
+        })
+        .catch(err => {
+          msg(errorMessage(err));
+        });
+      
+    }
+    
+    /* REGISTER */
+    function register() {
+      
+      let email = document.getElementById("email").value;
+      let password = document.getElementById("password").value;
+      
+      if (!email || !password) {
+        msg("Fill all fields");
+        return;
+      }
+      
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(async user => {
+          
+          await user.user.sendEmailVerification();
+          
+          msg("Verification email sent");
+          
+          setTimeout(() => {
+            showLogin();
+          }, 2000);
+          
+        })
+        .catch(err => {
+          msg(errorMessage(err));
+        });
+      
+    }
+    
+    /* ERRORS */
+    function errorMessage(err) {
+      
+      switch (err.code) {
+        case "auth/invalid-email":
+          return "Invalid email";
+          
+        case "auth/email-already-in-use":
+          return "Email already in use";
+          
+        case "auth/wrong-password":
+          return "Wrong password";
+          
+        case "auth/user-not-found":
+          return "User not found";
+          
+        case "auth/weak-password":
+          return "Weak password";
+          
+        default:
+          return err.message;
+      }
+      
+    }
+  </script>
+  
+</body>
+
+</html>

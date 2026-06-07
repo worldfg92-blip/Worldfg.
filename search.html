@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorldFG Search</title>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <script src="firebase.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial;
+    }
+    
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px;
+    }
+    
+    .item {
+      padding: 10px;
+      border-bottom: 1px solid #111;
+    }
+  </style>
+  
+</head>
+
+<body>
+  
+  <input id="q" placeholder="Search users or posts..." oninput="runSearch()">
+  
+  <div id="results"></div>
+  
+  <script>
+    function runSearch() {
+      
+      let q = document.getElementById("q").value;
+      
+      if (!q) return;
+      
+      searchUsers(q, users => {
+        
+        let box = document.getElementById("results");
+        box.innerHTML = "<h3>Users</h3>";
+        
+        users.forEach(u => {
+          
+          box.innerHTML += `
+<div class="item">
+👤 ${u.username || u.email}
+</div>
+`;
+          
+        });
+        
+      });
+      
+      searchPosts(q, posts => {
+        
+        let box = document.getElementById("results");
+        
+        box.innerHTML += "<h3>Posts</h3>";
+        
+        posts.forEach(p => {
+          
+          box.innerHTML += `
+<div class="item">
+📸 ${p.caption || ""}
+</div>
+`;
+          
+        });
+        
+      });
+      
+    }
+  </script>
+  
+</body>
+
+</html>

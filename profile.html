@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script src="firebase.js"></script>
+
+<style>
+body{margin:0;background:#000;color:#fff;font-family:Arial;text-align:center;}
+
+.box{padding:20px;}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2 id="name">Loading...</h2>
+<p id="email"></p>
+
+</div>
+
+<script>
+
+firebase.auth().onAuthStateChanged(async user=>{
+
+if(!user){
+window.location.href="login.html";
+return;
+}
+
+let data = await getProfile(user.uid);
+
+if(!data){
+document.getElementById("name").innerText="No Profile";
+return;
+}
+
+document.getElementById("name").innerText=data.username;
+document.getElementById("email").innerText=data.email;
+
+});
+
+</script>
+
+</body>
+</html>
