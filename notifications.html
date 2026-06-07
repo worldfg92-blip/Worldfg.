@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Notifications</title>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <script src="firebase.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial;
+    }
+    
+    .item {
+      padding: 15px;
+      border-bottom: 1px solid #111;
+    }
+  </style>
+  
+</head>
+
+<body>
+  
+  <h3 style="padding:10px;">Notifications</h3>
+  
+  <div id="list"></div>
+  
+  <script>
+    firebase.auth().onAuthStateChanged(user => {
+      
+      if (!user) {
+        window.location = "login.html";
+      }
+      
+      db.collection("notifications")
+        .where("toUser", "==", user.email)
+        .orderBy("createdAt", "desc")
+        .onSnapshot(snapshot => {
+          
+          let box = document.getElementById("list");
+          box.innerHTML = "";
+          
+          snapshot.forEach(doc => {
+            
+            let n = doc.data();
+            
+            box.innerHTML += `
+        <div class="item">
+          <b>${n.fromUser}</b> ${n.type} your post ❤️
+        </div>
+      `;
+          });
+          
+        });
+      
+    });
+  </script>
+  
+</body>
+
+</html>

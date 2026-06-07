@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script src="firebase.js"></script>
+
+<style>
+body{background:#000;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh;}
+
+.box{width:90%;max-width:300px;}
+
+input{width:100%;padding:10px;margin:5px 0;}
+
+button{width:100%;padding:10px;margin-top:5px;}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>WorldFG</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+<button onclick="register()">Create Account</button>
+
+</div>
+
+<script>
+
+function login(){
+
+loginUser(
+document.getElementById("email").value,
+document.getElementById("password").value
+).then(()=>{
+
+window.location.href="index.html";
+
+}).catch(err=>{
+alert(err.message);
+});
+
+}
+
+function register(){
+
+registerUser(
+document.getElementById("email").value,
+document.getElementById("password").value,
+"First",
+"Last",
+"user"
+).then(()=>{
+
+alert("Check your email for verification");
+});
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>WorldFG - Messages</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#000;color:#fff}
+
+/* HEADER */
+.header{
+display:flex;justify-content:space-between;align-items:center;
+padding:12px 16px;border-bottom:1px solid #222;
+position:sticky;top:0;background:#000;z-index:10
+}
+.header h2{font-size:18px}
+
+/* LAYOUT */
+.container{display:flex;height:calc(100vh - 50px)}
+
+/* CHAT LIST */
+.chat-list{
+width:100%;
+border-right:1px solid #222;
+overflow-y:auto;
+}
+.chat-item{
+display:flex;align-items:center;gap:12px;
+padding:12px;border-bottom:1px solid #111;
+cursor:pointer
+}
+.chat-item:hover{background:#111}
+.avatar{
+width:45px;height:45px;border-radius:50%;
+background:linear-gradient(135deg,#6366f1,#06b6d4);
+display:flex;align-items:center;justify-content:center;
+overflow:hidden
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.chat-info{flex:1}
+.chat-name{font-weight:600}
+.chat-last{font-size:12px;color:#aaa;margin-top:3px}
+
+/* CHAT BOX */
+.chat-box{
+display:none;
+flex-direction:column;
+width:100%;
+height:100%;
+}
+.chat-header{
+display:flex;align-items:center;gap:10px;
+padding:10px;border-bottom:1px solid #222;
+}
+.back{cursor:pointer;font-size:18px}
+.messages{
+flex:1;
+overflow-y:auto;
+padding:10px;
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+.msg{
+max-width:70%;
+padding:10px;
+border-radius:12px;
+font-size:14px
+}
+.me{
+align-self:flex-end;
+background:linear-gradient(135deg,#6366f1,#06b6d4);
+color:#fff
+}
+.them{
+align-self:flex-start;
+background:#222
+}
+
+/* INPUT */
+.input-box{
+display:flex;
+padding:10px;
+border-top:1px solid #222;
+gap:8px
+}
+.input-box input{
+flex:1;
+padding:10px;
+border-radius:20px;
+border:none;
+outline:none;
+background:#111;
+color:#fff
+}
+.input-box button{
+background:#6366f1;
+border:none;
+padding:10px 15px;
+border-radius:20px;
+color:#fff;
+cursor:pointer
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h2>Messages</h2>
+<i class="fas fa-edit"></i>
+</div>
+
+<div class="container">
+
+<!-- CHAT LIST -->
+<div class="chat-list" id="chatList"></div>
+
+<!-- CHAT BOX -->
+<div class="chat-box" id="chatBox">
+
+<div class="chat-header">
+<span class="back" onclick="closeChat()">←</span>
+<div class="avatar" id="chatAvatar">U</div>
+<div>
+<div class="chat-name" id="chatName">Chat</div>
+</div>
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="input-box">
+<input id="msgInput" placeholder="Message...">
+<button onclick="sendMsg()">Send</button>
+</div>
+
+</div>
+
+</div>
+
+<script src="data.js"></script>
+
+<script>
+var currentUser = getCurrentUser();
+var activeChatUser = null;
+
+/* LOAD USERS */
+function loadChats(){
+var users = WorldFG.users || [];
+var html = "";
+
+users.forEach(u=>{
+if(u.id === currentUser.id) return;
+
+html += `
+<div class="chat-item" onclick="openChat('${u.id}')">
+<div class="avatar">${u.profilePic ? `<img src="${u.profilePic}">` : u.avatar}</div>
+<div class="chat-info">
+<div class="chat-name">${u.fullName}</div>
+<div class="chat-last">Tap to chat</div>
+</div>
+</div>
+`;
+});
+
+document.getElementById("chatList").innerHTML = html;
+}
+
+/* OPEN CHAT */
+function openChat(id){
+activeChatUser = getUserById(id);
+
+document.getElementById("chatBox").style.display="flex";
+document.getElementById("chatList").style.display="none";
+
+document.getElementById("chatName").innerText = activeChatUser.fullName;
+document.getElementById("chatAvatar").innerHTML =
+activeChatUser.profilePic ? `<img src="${activeChatUser.profilePic}">` : activeChatUser.avatar;
+
+loadMessages();
+}
+
+/* CLOSE CHAT */
+function closeChat(){
+document.getElementById("chatBox").style.display="none";
+document.getElementById("chatList").style.display="block";
+activeChatUser=null;
+}
+
+/* LOAD MESSAGES */
+function loadMessages(){
+var msgs = WorldFG.messages || [];
+var box = document.getElementById("messages");
+box.innerHTML="";
+
+msgs
+.filter(m =>
+(m.from === currentUser.id && m.to === activeChatUser.id) ||
+(m.from === activeUserId(activeChatUser.id) && m.to === currentUser.id)
+)
+.forEach(m=>{
+box.innerHTML += `
+<div class="msg ${m.from === currentUser.id ? 'me':'them'}">
+${m.text}
+</div>
+`;
+});
+
+box.scrollTop = box.scrollHeight;
+}
+
+/* SEND MESSAGE */
+function sendMsg(){
+var text = document.getElementById("msgInput").value;
+if(!text) return;
+
+WorldFG.messages.push({
+from: currentUser.id,
+to: activeChatUser.id,
+text:text,
+time:new Date().toISOString()
+});
+
+saveWorldFGData();
+
+document.getElementById("msgInput").value="";
+loadMessages();
+}
+
+/* HELPER */
+function activeUserId(id){ return id; }
+
+loadChats();
+</script>
+
+</body>
+</html>

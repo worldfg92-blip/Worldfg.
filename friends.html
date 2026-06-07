@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WorldFG - Friends</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            padding-bottom: 70px;
+        }
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: #000; border-bottom: 1px solid #222;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .back-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+        .header-title { font-size: 18px; font-weight: 600; }
+        
+        .tabs {
+            display: flex; border-bottom: 1px solid #222;
+            background: #000;
+        }
+        .tab-btn {
+            flex: 1; padding: 12px; background: none; border: none;
+            color: #888; font-weight: 600; cursor: pointer;
+            font-size: 14px;
+        }
+        .tab-btn.active { color: #6366f1; border-bottom: 2px solid #6366f1; }
+        
+        .friends-list { max-width: 600px; margin: 0 auto; padding: 16px; }
+        .friend-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; border-bottom: 1px solid #222;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .friend-item:hover { background: #111; }
+        .friend-avatar {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; font-size: 20px; font-weight: bold;
+        }
+        .friend-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .friend-info { flex: 1; }
+        .friend-name { font-weight: 600; margin-bottom: 4px; }
+        .friend-mutual { font-size: 11px; color: #888; }
+        .friend-actions { display: flex; gap: 8px; }
+        .friend-btn {
+            background: rgba(255,255,255,0.08); border: 1px solid #333;
+            border-radius: 20px; padding: 6px 16px; color: #fff;
+            font-size: 12px; cursor: pointer;
+        }
+        .friend-btn.following { background: #0095f6; border-color: #0095f6; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #888; }
+        .empty-state i { font-size: 50px; margin-bottom: 16px; display: block; }
+        
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-around; padding: 10px 0; z-index: 100;
+        }
+        .bottom-nav a {
+            color: #888; font-size: 22px; text-decoration: none;
+            display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px;
+            cursor: pointer;
+        }
+        .bottom-nav a i { font-size: 22px; }
+        .bottom-nav a.active { color: #6366f1; }
+        
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 10px 20px; border-radius: 30px;
+            font-size: 13px; z-index: 9999; animation: fadeOut 2s ease forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; } 85% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+        <span class="header-title">Friends</span>
+        <div style="width: 40px;"></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('followers')">Followers</button>
+        <button class="tab-btn" onclick="switchTab('following')">Following</button>
+        <button class="tab-btn" onclick="switchTab('suggestions')">Suggestions</button>
+    </div>
+
+    <div id="friendsList" class="friends-list">
+        <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="home.html"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="marketplace.html"><i class="fas fa-store"></i><span>Marketplace</span></a>
+        <a href="messages.html"><i class="fas fa-comment"></i><span>Messages</span></a>
+        <a href="notifications.html"><i class="fas fa-bell"></i><span>Notifs</span></a>
+        <a href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        var currentUser = null;
+        var currentTab = 'followers';
+        
+        function goBack() {
+            window.location.href = 'home.html';
+        }
+        
+        function showToast(msg) {
+            var t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            document.body.appendChild(t);
+            setTimeout(function() { if(t.parentNode) t.remove(); }, 3000);
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (tab === 'followers') document.querySelector('.tab-btn:first-child').classList.add('active');
+            else if (tab === 'following') document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+            else document.querySelector('.tab-btn:last-child').classList.add('active');
+            loadFriends();
+        }
+        
+        function loadFriends() {
+            var container = document.getElementById('friendsList');
+            if (!container) return;
+            
+            var users = [];
+            
+            if (currentTab === 'followers') {
+                var followers = getFollowers(currentUser.id);
+                users = followers.map(f => getUserById(f.followerId)).filter(u => u);
+            } else if (currentTab === 'following') {
+                var following = getFollowing(currentUser.id);
+                users = following.map(f => getUserById(f.followingId)).filter(u => u);
+            } else {
+                users = suggestFriends(currentUser.id);
+            }
+            
+            if (users.length === 0) {
+                var message = currentTab === 'followers' ? 'No followers yet' : (currentTab === 'following' ? 'Not following anyone yet' : 'No suggestions yet');
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i> ' + message + '</div>';
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                var avatarHtml = user.profilePic ? '<img src="' + user.profilePic + '">' : (user.avatar || user.fullName.charAt(0));
+                var mutualCount = getMutualFollowers(currentUser.id, user.id).length;
+                var isFollowing = isFollowing(currentUser.id, user.id);
+                
+                html += '<div class="friend-item" onclick="viewProfile(\'' + user.id + '\')">' +
+                    '<div class="friend-avatar">' + avatarHtml + '</div>' +
+                    '<div class="friend-info">' +
+                    '<div class="friend-name">' + escapeHtml(user.fullName) + '</div>' +
+                    '<div class="friend-mutual">' + mutualCount + ' mutual followers</div>' +
+                    '</div>' +
+                    '<div class="friend-actions">' +
+                    (currentTab !== 'suggestions' ? 
+                        '<button class="friend-btn" onclick="event.stopPropagation(); messageUser(\'' + user.id + '\')"><i class="fas fa-comment"></i> Message</button>' : '') +
+                    '<button class="friend-btn ' + (isFollowing ? 'following' : '') + '" onclick="event.stopPropagation(); toggleFollow(\'' + user.id + '\', this)">' + (isFollowing ? 'Following' : 'Follow') + '</button>' +
+                    '</div>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+        }
+        
+        function viewProfile(userId) {
+            window.location.href = 'profile.html?id=' + userId;
+        }
+        
+        function messageUser(userId) {
+            window.location.href = 'messages.html?user=' + userId;
+        }
+        
+        function toggleFollow(userId, btn) {
+            var isCurrentlyFollowing = isFollowing(currentUser.id, userId);
+            if (isCurrentlyFollowing) {
+                unfollowUser(currentUser.id, userId);
+                btn.innerText = 'Follow';
+                btn.classList.remove('following');
+                showToast('Unfollowed');
+            } else {
+                followUser(currentUser.id, userId);
+                btn.innerText = 'Following';
+                btn.classList.add('following');
+                showToast('Followed');
+            }
+            loadFriends();
+        }
+        
+        function init() {
+            currentUser = getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+            loadFriends();
+            
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'worldfg_db_updated') {
+                    loadData();
+                    loadFriends();
+                }
+            });
+        }
+        
+        init();
+    </script>
+</body>
+</html>

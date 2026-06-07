@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>WorldFG</title>
+  
+  <link rel="stylesheet" href="assets/styles.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  
+  <script src="firebase/firebase.js"></script>
+  <script src="assets/app.js"></script>
+  
+</head>
+
+<body>
+  
+  <div class="card">
+    <h2>WorldFG Feed</h2>
+    
+    <button onclick="goTo('search.html')">🔍 Search</button>
+    <button onclick="goTo('reels.html')">🎥 Reels</button>
+    <button onclick="goTo('chat.html')">💬 Chat</button>
+    <button onclick="goTo('notifications.html')">🔔 Notifications</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+  
+  <div id="feed"></div>
+  
+  <script>
+    firebase.auth().onAuthStateChanged(user => {
+      
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      
+      loadAIFeed(renderFeed);
+      
+    });
+    
+    function renderFeed(posts) {
+      
+      let feed = document.getElementById("feed");
+      feed.innerHTML = "";
+      
+      posts.forEach(p => {
+        
+        feed.innerHTML += `
+<div class="card">
+
+<b>${p.user}</b>
+<img src="${p.imageUrl}" style="width:100%;border-radius:10px;">
+<p>${p.caption || ""}</p>
+
+</div>
+`;
+        
+      });
+      
+    }
+  </script>
+  
+</body>
+
+</html>

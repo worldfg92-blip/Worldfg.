@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldFG</title>
+
+<link rel="stylesheet" href="ui.css">
+<script src="ui.js"></script>
+
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">WorldFG</div>
+  <div>
+    <i class="icon">❤️</i>
+    <i class="icon">✈️</i>
+  </div>
+</div>
+
+<!-- STORIES -->
+<div class="stories">
+  <div class="story" onclick="openStory()">
+    <div class="story-ring">
+      <div class="story-inner"></div>
+    </div>
+    <small>You</small>
+  </div>
+
+  <div class="story">
+    <div class="story-ring">
+      <div class="story-inner"></div>
+    </div>
+    <small>Mike</small>
+  </div>
+</div>
+
+<!-- FEED -->
+<div class="post">
+  <div class="post-header">
+    <div class="avatar"></div>
+    <div class="username">user_01</div>
+  </div>
+
+  <img class="post-img" src="https://picsum.photos/500/500">
+
+  <div class="actions">
+    <span onclick="likeButton(this)">❤️</span>
+    <span>💬</span>
+    <span>📤</span>
+  </div>
+
+  <div class="caption">
+    This is WorldFG Instagram-style UI 🚀
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <i onclick="go('home.html')">🏠</i>
+  <i onclick="go('reels.html')">🎬</i>
+  <i>➕</i>
+  <i onclick="go('chat.html')">💬</i>
+  <i onclick="go('notifications.html')">🔔</i>
+</div>
+
+</body>
+</html>
